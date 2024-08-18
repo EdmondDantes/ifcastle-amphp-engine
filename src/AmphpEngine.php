@@ -3,10 +3,9 @@ declare(strict_types=1);
 
 namespace IfCastle\Amphp;
 
-use IfCastle\Application\EngineInterface;
-use IfCastle\Application\EngineRolesEnum;
+use IfCastle\Application\EngineAbstract;
 
-class AmphpEngine implements EngineInterface
+class AmphpEngine extends EngineAbstract
 {
     #[\Override]
     public function start(): void
@@ -17,30 +16,6 @@ class AmphpEngine implements EngineInterface
     public function getEngineName(): string
     {
         return 'amphp/'.phpversion();
-    }
-    
-    #[\Override]
-    public function getEngineRole(): EngineRolesEnum
-    {
-        return EngineRolesEnum::PROCESS;
-    }
-    
-    #[\Override]
-    public function isServer(): bool
-    {
-        return false;
-    }
-    
-    #[\Override]
-    public function isProcess(): bool
-    {
-        return true;
-    }
-    
-    #[\Override]
-    public function isConsole(): bool
-    {
-        return false;
     }
     
     #[\Override]

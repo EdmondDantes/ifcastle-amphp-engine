@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6bff8a92533c19b9557a1b933b0d8d41",
+    "content-hash": "72fec8dbdb14e5f70a06378151503182",
     "packages": [
         {
             "name": "amphp/amp",
@@ -89,16 +89,16 @@
         },
         {
             "name": "ifcastle/application",
-            "version": "v0.5.11",
+            "version": "v0.6.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/EdmondDantes/application.git",
-                "reference": "cefeb75e60dd6949ab62dc8427576f1f00b0aacf"
+                "reference": "8811fa19fb42c13fcaa55b6b2c01ecc9ede998f7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/EdmondDantes/application/zipball/cefeb75e60dd6949ab62dc8427576f1f00b0aacf",
-                "reference": "cefeb75e60dd6949ab62dc8427576f1f00b0aacf",
+                "url": "https://api.github.com/repos/EdmondDantes/application/zipball/8811fa19fb42c13fcaa55b6b2c01ecc9ede998f7",
+                "reference": "8811fa19fb42c13fcaa55b6b2c01ecc9ede998f7",
                 "shasum": ""
             },
             "require": {
@@ -131,9 +131,9 @@
             ],
             "support": {
                 "issues": "https://github.com/EdmondDantes/application/issues",
-                "source": "https://github.com/EdmondDantes/application/tree/v0.5.11"
+                "source": "https://github.com/EdmondDantes/application/tree/v0.6.1"
             },
-            "time": "2024-08-16T06:13:52+00:00"
+            "time": "2024-08-18T18:14:18+00:00"
         },
         {
             "name": "ifcastle/design-patterns",

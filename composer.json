@@ -25,7 +25,7 @@
         }
     },
     "require": {
-        "ifcastle/application": "^0.5.0",
+        "ifcastle/application": "^0.6.0",
         "amphp/amp": "^3.0"
     },
     "require-dev": {
