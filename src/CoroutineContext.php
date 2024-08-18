@@ -3,7 +3,10 @@ declare(strict_types=1);
 
 namespace IfCastle\Amphp;
 
-final class CoroutineContext extends \ArrayObject
+use IfCastle\DI\DisposableInterface;
+
+final class CoroutineContext        extends \ArrayObject
+                                    implements DisposableInterface
 {
     private array $callbacks        = [];
     
@@ -12,10 +15,34 @@ final class CoroutineContext extends \ArrayObject
         $this->callbacks[]          = $callback;
     }
     
+    #[\Override]
+    public function dispose(): void
+    {
+        $callbacks                  = $this->callbacks;
+        $this->callbacks            = [];
+        $errors                     = [];
+        
+        foreach($callbacks as $callback) {
+            try {
+                $callback();
+            } catch(\Throwable $throwable) {
+                $errors[]           = $throwable;
+            }
+        }
+        
+        $this->exchangeArray([]);
+        
+        if(count($errors) === 0) {
+            throw $errors[0];
+        }
+        
+        if(count($errors) > 1) {
+            throw new \RuntimeException('Multiple errors occurred during coroutine disposal', 0, $errors[0]);
+        }
+    }
+    
     public function __destruct()
     {
-        foreach($this->callbacks as $callback) {
-            $callback();
-        }
+        $this->dispose();
     }
 }
