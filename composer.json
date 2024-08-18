@@ -9,7 +9,7 @@
             "package": {
                 "name": "amphp-engine",
                 "bootloaders": [
-                    "IfCastle\\Configurator\\ConfigApplication"
+                    "IfCastle\\Amphp\\Bootloader"
                 ]
             }
         }
