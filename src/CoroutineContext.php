@@ -3,46 +3,126 @@ declare(strict_types=1);
 
 namespace IfCastle\Amphp;
 
-use IfCastle\DI\DisposableInterface;
+use IfCastle\Application\CoroutineContextInterface;
+use Revolt\EventLoop;
 
-final class CoroutineContext        extends \ArrayObject
-                                    implements DisposableInterface
+final class CoroutineContext        implements CoroutineContextInterface
 {
-    private array $callbacks        = [];
+    private static array $contexts  = [];
+    private static array            $fibers      = [];
+    private static ?InternalContext $mainContext = null;
     
-    public function defer(callable $callback): void
+    private static function defineCurrentContext(): InternalContext
     {
-        $this->callbacks[]          = $callback;
+        self::tryGarbageCollector();
+        
+        $currentFiber               = \Fiber::getCurrent();
+        
+        if($currentFiber === null) {
+            
+            if(self::$mainContext === null) {
+                self::$mainContext  = new InternalContext();
+            }
+            
+            return self::$mainContext;
+        }
+        
+        $cid                        = spl_object_id($currentFiber);
+        
+        if(!isset(self::$contexts[$cid])) {
+            self::$contexts[$cid]   = new InternalContext();
+            self::$fibers[$cid]     = $currentFiber;
+        }
+        
+        return self::$contexts[$cid];
     }
     
-    #[\Override]
-    public function dispose(): void
+    private static function tryGarbageCollector(): void
     {
-        $callbacks                  = $this->callbacks;
-        $this->callbacks            = [];
-        $errors                     = [];
-        
-        foreach($callbacks as $callback) {
-            try {
-                $callback();
-            } catch(\Throwable $throwable) {
-                $errors[]           = $throwable;
+        foreach (self::$fibers as $fiber) {
+            if ($fiber->isTerminated()) {
+                EventLoop::defer(self::disposeContexts(...));
+                return;
             }
         }
-        
-        $this->exchangeArray([]);
-        
-        if(count($errors) === 0) {
-            throw $errors[0];
-        }
-        
-        if(count($errors) > 1) {
-            throw new \RuntimeException('Multiple errors occurred during coroutine disposal', 0, $errors[0]);
+    }
+    
+    public static function disposeContexts(): void
+    {
+        foreach (self::$fibers as $cid => $fiber) {
+            if (false === $fiber->isTerminated()) {
+                continue;
+            }
+            
+            unset(self::$fibers[$cid]);
+            
+            $context                = self::$contexts[$cid] ?? null;
+            
+            if($context !== null) {
+                unset(self::$contexts[$cid]);
+                $context->dispose();
+            }
         }
     }
     
-    public function __destruct()
+    public function isCoroutine(): bool
     {
-        $this->dispose();
+        return \Fiber::getCurrent() !== null;
+    }
+    
+    public function getCoroutineId(): string|int
+    {
+        $currentFiber               = \Fiber::getCurrent();
+        
+        if($currentFiber === null) {
+            return -1;
+        }
+        
+        return spl_object_id($currentFiber);
+    }
+    
+    public function getCoroutineParentId(): string|int
+    {
+        return -1;
+    }
+    
+    public function has(string $key): bool
+    {
+        return self::defineCurrentContext()->offsetExists($key);
+    }
+    
+    public function get(string $key): mixed
+    {
+        $context                    = self::defineCurrentContext();
+        
+        if(!$context->offsetExists($key)) {
+            return null;
+        }
+        
+        return $context->offsetGet($key);
+    }
+    
+    public function getLocal(string $key): mixed
+    {
+        return $this->get($key);
+    }
+    
+    public function hasLocal(string $key): bool
+    {
+        return $this->has($key);
+    }
+    
+    public function set(string $key, mixed $value): static
+    {
+        self::defineCurrentContext()->offsetSet($key, $value);
+        
+        return $this;
+    }
+    
+    public function defer(callable $callback): static
+    {
+        self::defineCurrentContext()->defer($callback);
+        
+        return $this;
     }
 }

@@ -4,6 +4,16 @@
     "type": "ifcastle-engine",
     "license": "MIT",
     "keywords": ["engine", "ifcastle", "amphp", "async", "parallel"],
+    "extra": {
+        "ifcastle-installer": {
+            "package": {
+                "name": "amphp-engine",
+                "bootloaders": [
+                    "IfCastle\\Configurator\\ConfigApplication"
+                ]
+            }
+        }
+    },
     "autoload": {
         "psr-4": {
             "IfCastle\\Amphp\\": "src/"
