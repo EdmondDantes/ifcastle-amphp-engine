@@ -32,7 +32,11 @@ final class InternalContext         extends \ArrayObject
         
         $this->exchangeArray([]);
         
-        if(count($errors) === 0) {
+        if($errors === []) {
+            return;
+        }
+        
+        if(count($errors) === 1) {
             throw $errors[0];
         }
         

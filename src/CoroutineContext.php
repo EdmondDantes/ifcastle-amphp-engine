@@ -8,61 +8,15 @@ use Revolt\EventLoop;
 
 final class CoroutineContext        implements CoroutineContextInterface
 {
-    private static array $contexts  = [];
-    private static array            $fibers      = [];
-    private static ?InternalContext $mainContext = null;
+    private static EventLoop\FiberLocal $fiberLocal;
     
     private static function defineCurrentContext(): InternalContext
     {
-        self::tryGarbageCollector();
-        
-        $currentFiber               = \Fiber::getCurrent();
-        
-        if($currentFiber === null) {
-            
-            if(self::$mainContext === null) {
-                self::$mainContext  = new InternalContext();
-            }
-            
-            return self::$mainContext;
+        if(empty(self::$fiberLocal)) {
+            self::$fiberLocal       = new EventLoop\FiberLocal(fn() => new InternalContext);
         }
         
-        $cid                        = spl_object_id($currentFiber);
-        
-        if(!isset(self::$contexts[$cid])) {
-            self::$contexts[$cid]   = new InternalContext();
-            self::$fibers[$cid]     = $currentFiber;
-        }
-        
-        return self::$contexts[$cid];
-    }
-    
-    private static function tryGarbageCollector(): void
-    {
-        foreach (self::$fibers as $fiber) {
-            if ($fiber->isTerminated()) {
-                EventLoop::defer(self::disposeContexts(...));
-                return;
-            }
-        }
-    }
-    
-    public static function disposeContexts(): void
-    {
-        foreach (self::$fibers as $cid => $fiber) {
-            if (false === $fiber->isTerminated()) {
-                continue;
-            }
-            
-            unset(self::$fibers[$cid]);
-            
-            $context                = self::$contexts[$cid] ?? null;
-            
-            if($context !== null) {
-                unset(self::$contexts[$cid]);
-                $context->dispose();
-            }
-        }
+        return self::$fiberLocal->get();
     }
     
     public function isCoroutine(): bool
