@@ -11,8 +11,8 @@ use Amp\Pipeline\Queue;
 
 final class AsyncStack              implements StackInterface
 {
-    private Queue $queue;
-    private ConcurrentIterator $iterator;
+    private Queue|null $queue;
+    private ConcurrentIterator|null $iterator;
     private int $size = 0;
     
     public function __construct(private readonly int $waitTimeout = 1, int $bufferSize = 1)
@@ -25,6 +25,11 @@ final class AsyncStack              implements StackInterface
     public function pop(): object|null
     {
         try {
+            
+            if($this->size < 1) {
+                return null;
+            }
+            
             $this->iterator->continue(new TimeoutCancellation($this->waitTimeout));
             --$this->size;
             
@@ -41,6 +46,10 @@ final class AsyncStack              implements StackInterface
     #[\Override]
     public function push(object $object): void
     {
+        if($this->queue === null) {
+            return;
+        }
+        
         $this->queue->pushAsync($object);
         ++$this->size;
     }
@@ -54,10 +63,14 @@ final class AsyncStack              implements StackInterface
     #[\Override]
     public function clear(): void
     {
+        $this->size                = 0;
         $this->iterator->dispose();
         
         if(false === $this->queue->isComplete()) {
             $this->queue->complete();
         }
+        
+        $this->queue                = null;
+        $this->iterator             = null;
     }
 }
