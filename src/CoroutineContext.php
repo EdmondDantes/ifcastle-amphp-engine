@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace IfCastle\Amphp;
 
-use IfCastle\Application\CoroutineContextInterface;
+use IfCastle\Async\CoroutineContextInterface;
 use Revolt\EventLoop;
 
 final class CoroutineContext        implements CoroutineContextInterface

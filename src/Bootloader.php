@@ -5,9 +5,9 @@ namespace IfCastle\Amphp;
 
 use IfCastle\Application\Bootloader\BootloaderExecutorInterface;
 use IfCastle\Application\Bootloader\BootloaderInterface;
-use IfCastle\Application\CoroutineContextInterface;
 use IfCastle\Application\EngineInterface;
-use IfCastle\Application\ScheduleTimerInterface;
+use IfCastle\Async\CoroutineContextInterface;
+use IfCastle\Async\ScheduleTimerInterface;
 
 final class Bootloader implements BootloaderInterface
 {

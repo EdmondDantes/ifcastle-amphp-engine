@@ -28,7 +28,8 @@
         "ifcastle/application": "^0.6.0",
         "amphp/amp": "^3.0",
         "ifcastle/design-patterns": "^v0.2.20",
-        "amphp/sync": "^2.3"
+        "amphp/sync": "^2.3",
+        "ifcastle/async-contracts": "^0.5.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.60",

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace IfCastle\Amphp;
 
-use IfCastle\Application\ScheduleTimerInterface;
+use IfCastle\Async\ScheduleTimerInterface;
 use Revolt\EventLoop;
 
 final class ScheduleTimer           implements ScheduleTimerInterface
