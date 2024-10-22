@@ -5,7 +5,6 @@ namespace IfCastle\Amphp\Internal;
 
 use Amp\Cancellation;
 use Amp\DeferredFuture;
-use IfCastle\Amphp\Internal\Exceptions\CoroutineNotStarted;
 use IfCastle\Amphp\Internal\Exceptions\CoroutineTerminationException;
 use Revolt\EventLoop;
 use Revolt\EventLoop\Suspension;
