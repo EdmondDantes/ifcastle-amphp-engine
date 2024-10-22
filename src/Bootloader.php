@@ -7,7 +7,7 @@ use IfCastle\Application\Bootloader\BootloaderExecutorInterface;
 use IfCastle\Application\Bootloader\BootloaderInterface;
 use IfCastle\Application\EngineInterface;
 use IfCastle\Async\CoroutineContextInterface;
-use IfCastle\Async\ScheduleTimerInterface;
+use IfCastle\Async\CoroutineSchedulerInterface;
 
 final class Bootloader implements BootloaderInterface
 {
@@ -18,6 +18,6 @@ final class Bootloader implements BootloaderInterface
         
         $builder->bindConstructible(EngineInterface::class, AmphpEngine::class)
                 ->bindConstructible(CoroutineContextInterface::class, CoroutineContext::class)
-                ->bindConstructible(ScheduleTimerInterface::class, ScheduleTimer::class);
+                ->bindConstructible(CoroutineSchedulerInterface::class, CoroutineScheduler::class);
     }
 }
