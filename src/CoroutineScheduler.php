@@ -20,10 +20,11 @@ use function Amp\Future\awaitAll;
 use function Amp\Future\awaitAny;
 use function Amp\Future\awaitAnyN;
 use function Amp\Future\awaitFirst;
+use function Amp\Sync\createChannelPair;
 
 final class CoroutineScheduler      implements CoroutineSchedulerInterface
 {
-    private static function resolveCancellation(CancellationInterface|null $cancellation): ?\Amp\Cancellation
+    public static function resolveCancellation(CancellationInterface|null $cancellation): ?\Amp\Cancellation
     {
         if($cancellation instanceof CancellationExternalAdapter) {
             return $cancellation->cancellation;
@@ -76,13 +77,14 @@ final class CoroutineScheduler      implements CoroutineSchedulerInterface
     #[\Override]
     public function createChannelPair(int $size = 0): array
     {
-        // TODO: Implement createChannelPair() method.
+        [$left, $right] = createChannelPair($size);
+        return [new ChannelAdapter($left), new ChannelAdapter($right)];
     }
     
     #[\Override]
     public function createQueue(int $size = 0): QueueInterface
     {
-        // TODO: Implement createQueue() method.
+        return new QueueAdapter(new \Amp\Pipeline\Queue($size));
     }
     
     public function createTimeoutCancellation(float $timeout, string $message = 'Operation timed out'): CancellationInterface
