@@ -12,6 +12,7 @@ use IfCastle\Async\QueueInterface;
 use Revolt\EventLoop;
 use function Amp\Future\await;
 use function Amp\Future\awaitAll;
+use function Amp\Future\awaitAny;
 use function Amp\Future\awaitFirst;
 
 final class CoroutineScheduler      implements CoroutineSchedulerInterface
@@ -70,7 +71,8 @@ final class CoroutineScheduler      implements CoroutineSchedulerInterface
     #[\Override]
     public function stopAllCoroutines(?\Throwable $exception = null): bool
     {
-        // TODO: Implement stopAllCoroutines() method.
+        Scheduler::default()->stopAll($exception);
+        return true;
     }
     
     #[\Override]
