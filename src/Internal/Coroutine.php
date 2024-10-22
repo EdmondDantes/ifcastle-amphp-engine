@@ -37,6 +37,11 @@ final class Coroutine
 
         return $closure($this);
     }
+    
+    public function getClosure(): \Closure|null
+    {
+        return $this->closure;
+    }
 
     public function resolve(mixed $data = null): void
     {
