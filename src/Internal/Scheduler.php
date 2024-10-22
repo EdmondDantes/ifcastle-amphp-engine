@@ -5,14 +5,24 @@ namespace IfCastle\Amphp\Internal;
 
 use Amp\Cancellation;
 use Amp\DeferredFuture;
-use Amp\Future;
-use IfCastle\AmpPool\Coroutine\Exceptions\CoroutineNotStarted;
-use IfCastle\AmpPool\Coroutine\Exceptions\CoroutineTerminationException;
+use IfCastle\Amphp\Internal\Exceptions\CoroutineNotStarted;
+use IfCastle\Amphp\Internal\Exceptions\CoroutineTerminationException;
 use Revolt\EventLoop;
 use Revolt\EventLoop\Suspension;
 
 final class Scheduler
 {
+    public static function default(): self
+    {
+        static $instance = null;
+        
+        if($instance === null) {
+            $instance = new self;
+        }
+        
+        return $instance;
+    }
+    
     /**
      * @var Coroutine[]
      */
@@ -101,7 +111,7 @@ final class Scheduler
         }
     }
 
-    public function run(Coroutine $coroutine, ?Cancellation $cancellation = null): Future
+    public function run(Coroutine $coroutine): string
     {
         $this->init();
 
@@ -116,7 +126,7 @@ final class Scheduler
             }
 
             if(false === \array_key_exists($callbackId, $self->coroutines)) {
-                $coroutine->fail(new CoroutineNotStarted);
+                $coroutine->cancel();
                 return;
             }
 
@@ -127,23 +137,18 @@ final class Scheduler
             unset($self);
 
             try {
-                $coroutine->resolve($coroutine->execute());
+                $coroutine->execute();
             } catch (\Throwable $exception) {
-
-                $coroutine->fail($exception);
-
                 if($exception !== $this->stopException) {
                     throw $exception;
                 }
-
             } finally {
 
                 $self               = $selfRef->get();
 
-                $coroutine->resolve();
-
                 if($self !== null) {
                     unset($self->coroutines[$callbackId]);
+                    $coroutine->cancel();
                 }
 
                 $self?->resume();
@@ -155,8 +160,8 @@ final class Scheduler
         if($coroutine->getPriority() >= $this->highestPriority) {
             $this->coroutinesQueue  = [];
         }
-
-        return $coroutine->getFuture();
+        
+        return $callbackId;
     }
 
     public function awaitAll(?Cancellation $cancellation = null): void
@@ -170,10 +175,34 @@ final class Scheduler
 
     public function stopAll(?\Throwable $exception = null): void
     {
-        $exception                  ??= new CoroutineTerminationException();
+        $exception                  ??= new CoroutineTerminationException('Coroutine has been terminated');
         $this->isRunning            = false;
         $this->stopException        = $exception;
         $this->resume();
+    }
+    
+    public function isCoroutineExists(string $callbackId): bool
+    {
+        return \array_key_exists($callbackId, $this->coroutines);
+    }
+    
+    public function findCoroutine(string $callbackId): Coroutine|null
+    {
+        return $this->coroutines[$callbackId] ?? null;
+    }
+    
+    public function stop(string $callbackId): bool
+    {
+        if(false === \array_key_exists($callbackId, $this->coroutines)) {
+            return false;
+        }
+        
+        $coroutine                  = $this->coroutines[$callbackId];
+        unset($this->coroutines[$callbackId]);
+        $coroutine->cancel();
+        EventLoop::cancel($callbackId);
+        
+        return true;
     }
 
     public function getCoroutinesCount(): int

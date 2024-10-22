@@ -5,28 +5,32 @@ namespace IfCastle\Amphp\Internal;
 
 use Amp\DeferredFuture;
 use Amp\Future;
+use IfCastle\Amphp\Internal\Exceptions\CoroutineNotStarted;
 use Revolt\EventLoop\Suspension;
 
 final class Coroutine
 {
-    private DeferredFuture $future;
+    private int $startAt = 0;
+    private bool $isFinished = false;
+    private bool $isCancelled = false;
     private Suspension|null     $suspension          = null;
     private \WeakReference|null $schedulerSuspension = null;
 
     public function __construct(
         private \Closure|null $closure,
         private readonly int $priority  = 0,
-        private int $startAt            = 0,
-        private readonly int $timeLimit = 0
-    ) {
-        $this->future               = new DeferredFuture;
-
-        if($this->startAt === 0) {
-            $this->startAt          = \time();
+        private readonly int $timeLimit = 0,
+        private readonly DeferredFuture|null $future  = null
+    ) {}
+    
+    public function __destruct()
+    {
+        if(false === $this->future?->isComplete()) {
+            $this->future->error(new CoroutineNotStarted($this));
         }
     }
-
-    public function execute(): mixed
+    
+    public function execute(): void
     {
         if(null === $this->closure) {
             throw new \Error('Coroutine is already executed');
@@ -34,8 +38,16 @@ final class Coroutine
 
         $closure                    = $this->closure;
         $this->closure              = null;
-
-        return $closure($this);
+        $this->startAt              = \time();
+        
+        try {
+            $closure($this);
+            $this->resolve();
+        } catch (\Throwable $exception) {
+            $this->fail($exception);
+        } finally {
+            $this->isFinished       = true;
+        }
     }
     
     public function getClosure(): \Closure|null
@@ -43,17 +55,25 @@ final class Coroutine
         return $this->closure;
     }
 
-    public function resolve(mixed $data = null): void
+    private function resolve(): void
     {
-        if(false === $this->future->isComplete()) {
-            $this->future->complete($data);
+        if(false === $this->future?->isComplete()) {
+            $this->future->complete();
         }
     }
 
-    public function fail(\Throwable $exception): void
+    private function fail(\Throwable $exception): void
     {
-        if(false === $this->future->isComplete()) {
+        if(false === $this->future?->isComplete()) {
             $this->future->error($exception);
+        }
+    }
+    
+    public function cancel(): void
+    {
+        if(false === $this->future?->isComplete()) {
+            $this->isCancelled = true;
+            $this->future->error(new CoroutineNotStarted($this));
         }
     }
 
@@ -80,9 +100,9 @@ final class Coroutine
         $this->schedulerSuspension = \WeakReference::create($schedulerSuspension);
     }
 
-    public function getFuture(): Future
+    public function getFuture(): Future|null
     {
-        return $this->future->getFuture();
+        return $this->future?->getFuture();
     }
 
     public function suspend(): void
@@ -99,6 +119,16 @@ final class Coroutine
     public function getStartAt(): int
     {
         return $this->startAt;
+    }
+    
+    public function isFinished(): bool
+    {
+        return $this->isFinished;
+    }
+    
+    public function isCancelled(): bool
+    {
+        return $this->isCancelled;
     }
 
     public function getTimeLimit(): int

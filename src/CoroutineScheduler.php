@@ -3,24 +3,23 @@ declare(strict_types=1);
 
 namespace IfCastle\Amphp;
 
+use IfCastle\Amphp\Internal\Coroutine;
+use IfCastle\Amphp\Internal\Scheduler;
 use IfCastle\Async\CancellationInterface;
-use IfCastle\Async\ChannelInterface;
 use IfCastle\Async\CoroutineInterface;
 use IfCastle\Async\CoroutineSchedulerInterface;
-use IfCastle\Async\FutureInterface;
 use IfCastle\Async\QueueInterface;
 use Revolt\EventLoop;
 use function Amp\Future\await;
 use function Amp\Future\awaitAll;
-use function Amp\Future\awaitAnyN;
 use function Amp\Future\awaitFirst;
 
 final class CoroutineScheduler      implements CoroutineSchedulerInterface
 {
     #[\Override]
-    public function run(callable $coroutine): CoroutineInterface
+    public function run(\Closure $function): CoroutineInterface
     {
-        EventLoop::defer($coroutine);
+        return new CoroutineAdapter(Scheduler::default()->run(new Coroutine($function)));
     }
     
     #[\Override]
