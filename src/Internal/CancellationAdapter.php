@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace IfCastle\Amphp;
+namespace IfCastle\Amphp\Internal;
 
 use Amp\Cancellation;
 use Amp\CancelledException;

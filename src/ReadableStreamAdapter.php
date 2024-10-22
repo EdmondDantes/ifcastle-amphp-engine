@@ -6,6 +6,7 @@ namespace IfCastle\Amphp;
 use Amp\ByteStream\ReadableStream;
 use Amp\ByteStream\StreamException;
 use Amp\Cancellation;
+use IfCastle\Amphp\Internal\CancellationAdapter;
 use IfCastle\Async\CancellationInterface;
 use IfCastle\Async\ReadableStreamInterface;
 
