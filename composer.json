@@ -7,7 +7,7 @@
     "extra": {
         "ifcastle-installer": {
             "package": {
-                "name": "amphp-engine",
+                "name": "amphp_engine",
                 "bootloaders": [
                     "IfCastle\\Amphp\\Bootloader"
                 ]
