@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace IfCastle\Amphp\Internal;
@@ -14,14 +15,14 @@ final class Scheduler
     public static function default(): self
     {
         static $instance = null;
-        
-        if($instance === null) {
-            $instance = new self;
+
+        if ($instance === null) {
+            $instance = new self();
         }
-        
+
         return $instance;
     }
-    
+
     /**
      * @var Coroutine[]
      */
@@ -55,18 +56,18 @@ final class Scheduler
 
             $this->managerResumed   = false;
 
-            if($this->coroutinesQueue === []) {
+            if ($this->coroutinesQueue === []) {
 
                 $this->highestPriority = 0;
 
                 foreach ($this->coroutines as $coroutine) {
-                    if($coroutine->getPriority() > $this->highestPriority) {
+                    if ($coroutine->getPriority() > $this->highestPriority) {
                         $this->highestPriority = $coroutine->getPriority();
                     }
                 }
 
                 foreach ($this->coroutines as $coroutine) {
-                    if($coroutine->getPriority() === $this->highestPriority) {
+                    if ($coroutine->getPriority() === $this->highestPriority) {
                         $this->coroutinesQueue[] = $coroutine;
                     }
                 }
@@ -79,10 +80,10 @@ final class Scheduler
 
         try {
 
-            if($this->stopException !== null) {
+            if ($this->stopException !== null) {
                 foreach ($this->coroutines as $callbackId => $coroutine) {
 
-                    if($coroutine->getSuspension() === null) {
+                    if ($coroutine->getSuspension() === null) {
                         EventLoop::cancel($callbackId);
                     } else {
                         $coroutine->getSuspension()->throw($this->stopException);
@@ -120,11 +121,11 @@ final class Scheduler
 
             $self                   = $selfRef->get();
 
-            if($self === null) {
+            if ($self === null) {
                 return;
             }
 
-            if(false === \array_key_exists($callbackId, $self->coroutines)) {
+            if (false === \array_key_exists($callbackId, $self->coroutines)) {
                 $coroutine->cancel();
                 return;
             }
@@ -138,14 +139,14 @@ final class Scheduler
             try {
                 $coroutine->execute();
             } catch (\Throwable $exception) {
-                if($exception !== $this->stopException) {
+                if ($exception !== $this->stopException) {
                     throw $exception;
                 }
             } finally {
 
                 $self               = $selfRef->get();
 
-                if($self !== null) {
+                if ($self !== null) {
                     unset($self->coroutines[$callbackId]);
                     $coroutine->cancel();
                 }
@@ -156,16 +157,16 @@ final class Scheduler
 
         $this->coroutines[$callbackId] = $coroutine;
 
-        if($coroutine->getPriority() >= $this->highestPriority) {
+        if ($coroutine->getPriority() >= $this->highestPriority) {
             $this->coroutinesQueue  = [];
         }
-        
+
         return $callbackId;
     }
 
     public function awaitAll(?Cancellation $cancellation = null): void
     {
-        if($this->coroutines === [] || $this->future === null) {
+        if ($this->coroutines === [] || $this->future === null) {
             return;
         }
 
@@ -179,28 +180,28 @@ final class Scheduler
         $this->stopException        = $exception;
         $this->resume();
     }
-    
+
     public function isCoroutineExists(string $callbackId): bool
     {
         return \array_key_exists($callbackId, $this->coroutines);
     }
-    
+
     public function findCoroutine(string $callbackId): Coroutine|null
     {
         return $this->coroutines[$callbackId] ?? null;
     }
-    
+
     public function stop(string $callbackId): bool
     {
-        if(false === \array_key_exists($callbackId, $this->coroutines)) {
+        if (false === \array_key_exists($callbackId, $this->coroutines)) {
             return false;
         }
-        
+
         $coroutine                  = $this->coroutines[$callbackId];
         unset($this->coroutines[$callbackId]);
         $coroutine->cancel();
         EventLoop::cancel($callbackId);
-        
+
         return true;
     }
 
@@ -211,7 +212,7 @@ final class Scheduler
 
     protected function resume(): void
     {
-        if($this->managerResumed) {
+        if ($this->managerResumed) {
             return;
         }
 

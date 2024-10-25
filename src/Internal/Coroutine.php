@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace IfCastle\Amphp\Internal;
@@ -22,24 +23,24 @@ final class Coroutine
         private readonly int $timeLimit = 0,
         private readonly DeferredFuture|null $future  = null
     ) {}
-    
+
     public function __destruct()
     {
-        if(false === $this->future?->isComplete()) {
+        if (false === $this->future?->isComplete()) {
             $this->future->error(new CoroutineNotStarted($this));
         }
     }
-    
+
     public function execute(): void
     {
-        if(null === $this->closure) {
+        if (null === $this->closure) {
             throw new \Error('Coroutine is already executed');
         }
 
         $closure                    = $this->closure;
         $this->closure              = null;
         $this->startAt              = \time();
-        
+
         try {
             $closure($this);
             $this->resolve();
@@ -49,7 +50,7 @@ final class Coroutine
             $this->isFinished       = true;
         }
     }
-    
+
     public function getClosure(): \Closure|null
     {
         return $this->closure;
@@ -57,21 +58,21 @@ final class Coroutine
 
     private function resolve(): void
     {
-        if(false === $this->future?->isComplete()) {
+        if (false === $this->future?->isComplete()) {
             $this->future->complete();
         }
     }
 
     private function fail(\Throwable $exception): void
     {
-        if(false === $this->future?->isComplete()) {
+        if (false === $this->future?->isComplete()) {
             $this->future->error($exception);
         }
     }
-    
+
     public function cancel(): void
     {
-        if(false === $this->future?->isComplete()) {
+        if (false === $this->future?->isComplete()) {
             $this->isCancelled = true;
             $this->future->error(new CoroutineNotStarted($this));
         }
@@ -84,7 +85,7 @@ final class Coroutine
 
     public function defineSuspension(Suspension $suspension): void
     {
-        if($this->suspension !== null) {
+        if ($this->suspension !== null) {
             throw new \Error('Suspension is already defined');
         }
 
@@ -93,7 +94,7 @@ final class Coroutine
 
     public function defineSchedulerSuspension(Suspension $schedulerSuspension): void
     {
-        if($this->schedulerSuspension !== null) {
+        if ($this->schedulerSuspension !== null) {
             throw new \Error('Scheduler is already defined');
         }
 
@@ -120,12 +121,12 @@ final class Coroutine
     {
         return $this->startAt;
     }
-    
+
     public function isFinished(): bool
     {
         return $this->isFinished;
     }
-    
+
     public function isCancelled(): bool
     {
         return $this->isCancelled;
