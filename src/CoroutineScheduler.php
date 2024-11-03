@@ -88,16 +88,19 @@ final class CoroutineScheduler implements CoroutineSchedulerInterface
         return new QueueAdapter(new \Amp\Pipeline\Queue($size));
     }
 
+    #[\Override]
     public function createTimeoutCancellation(float $timeout, string $message = 'Operation timed out'): CancellationInterface
     {
         return new CancellationExternalAdapter(new TimeoutCancellation($timeout, $message));
     }
 
+    #[\Override]
     public function compositeCancellation(CancellationInterface... $cancellations): CancellationInterface
     {
         return new CancellationExternalAdapter(new CompositeCancellation(...\array_map(self::resolveCancellation(...), $cancellations)));
     }
 
+    #[\Override]
     public function createDeferredCancellation(): DeferredCancellationInterface
     {
         return new DeferredCancellationAdapter(new DeferredCancellation());

@@ -20,6 +20,7 @@ final class InternalContext extends \ArrayObject implements DisposableInterface
     {
         $callbacks                  = $this->callbacks;
         $this->callbacks            = [];
+
         $errors                     = [];
 
         foreach ($callbacks as $callback) {

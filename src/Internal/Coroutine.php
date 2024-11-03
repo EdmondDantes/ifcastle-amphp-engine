@@ -12,9 +12,13 @@ use Revolt\EventLoop\Suspension;
 final class Coroutine
 {
     private int $startAt = 0;
+
     private bool $isFinished = false;
+
     private bool $isCancelled = false;
+
     private Suspension|null     $suspension          = null;
+
     private \WeakReference|null $schedulerSuspension = null;
 
     public function __construct(
@@ -39,6 +43,7 @@ final class Coroutine
 
         $closure                    = $this->closure;
         $this->closure              = null;
+
         $this->startAt              = \time();
 
         try {

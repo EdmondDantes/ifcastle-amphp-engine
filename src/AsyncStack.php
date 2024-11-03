@@ -13,7 +13,9 @@ use IfCastle\DesignPatterns\Pool\StackInterface;
 final class AsyncStack implements StackInterface
 {
     private Queue|null $queue;
+
     private ConcurrentIterator|null $iterator;
+
     private int $size = 0;
 
     public function __construct(private readonly int $waitTimeout = 1, int $bufferSize = 1)

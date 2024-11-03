@@ -10,6 +10,7 @@ use IfCastle\Exceptions\RuntimeException;
 class CoroutineTerminationException extends RuntimeException
 {
     protected string $template = 'Coroutine termination exception in {file}::{line}';
+
     protected array $tags = ['coroutine', 'amphp'];
 
     /**
