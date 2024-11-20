@@ -13,7 +13,7 @@ use IfCastle\Async\ReadableStreamInterface;
 
 readonly class ReadableStreamAdapter implements ReadableStreamInterface
 {
-    public function __construct(private ReadableStream $readableStream) {}
+    public function __construct(public ReadableStream $readableStream) {}
 
     #[\Override]
     public function close(): void
