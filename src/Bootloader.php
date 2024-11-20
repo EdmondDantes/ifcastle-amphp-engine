@@ -17,7 +17,7 @@ final class Bootloader implements BootloaderInterface
     {
         $builder                    = $bootloaderExecutor->getBootloaderContext()->getSystemEnvironmentBootBuilder();
 
-        $builder->bindConstructible(EngineInterface::class, AmphpEngine::class)
+        $builder->bindConstructible(EngineInterface::class, AmphpEngine::class, isThrow: false)
                 ->bindConstructible(CoroutineContextInterface::class, CoroutineContext::class)
                 ->bindConstructible(CoroutineSchedulerInterface::class, CoroutineScheduler::class);
     }
