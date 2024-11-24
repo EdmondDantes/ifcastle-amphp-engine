@@ -25,9 +25,10 @@
         }
     },
     "require": {
-        "ifcastle/application": "^0.7",
+        "php": "^8.4",
+        "ifcastle/application": "^0.8",
         "amphp/amp": "^3.0",
-        "ifcastle/design-patterns": "^v0.3",
+        "ifcastle/design-patterns": "^v0.4",
         "amphp/sync": "^2.3",
         "ifcastle/async-contracts": "^0.5",
         "amphp/byte-stream": "^2.1"
